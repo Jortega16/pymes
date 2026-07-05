@@ -11,6 +11,8 @@ services:
     command: sh -c "npm run db:migrate && npm start"
     expose:
       - "4000"
+    networks:
+      - dokploy-network
 
   web:
     build:
@@ -21,3 +23,9 @@ services:
       - api
     expose:
       - "80"
+    networks:
+      - dokploy-network
+
+networks:
+  dokploy-network:
+    external: true

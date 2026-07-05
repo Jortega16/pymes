@@ -48,3 +48,14 @@ Para activar el deploy automático desde GitHub Actions:
 5. Haga push a `main`.
 
 Si usa el Auto Deploy nativo de Dokploy conectado a GitHub, el workflow seguirá sirviendo como validación CI antes o durante sus cambios.
+
+### Base de datos en Dokploy
+
+Si la API no puede resolver el host de PostgreSQL (por ejemplo `getaddrinfo EAI_AGAIN pymes-bd-xxxxx`):
+
+1. En Dokploy, abra la base de datos y copie la **Internal Connection URL**.
+2. En la app Compose, defina `DATABASE_URL` con esa URL interna (no la externa).
+3. Despliegue con **Isolated Deployments desactivado** si la base de datos está en el mismo proyecto.
+4. `docker-compose.yml` ya une `api` y `web` a `dokploy-network`, la red donde viven las bases de datos administradas por Dokploy.
+
+Tras cambiar variables o redes, redepliegue la app Compose desde Dokploy.
