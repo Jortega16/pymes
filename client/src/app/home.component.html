@@ -1,0 +1,103 @@
+<header class="site-header">
+  <a class="brand brand--dark" routerLink="/">
+    <span class="brand__mark">✓</span>
+    <span class="brand__word"><strong>Pymes</strong><small>Verificadas</small></span>
+  </a>
+  <nav class="site-nav">
+    <a routerLink="/categorias">Categorias⌄</a>
+    <a routerLink="/como-funciona">Cómo funciona</a>
+    <a routerLink="/sobre-nosotros">Sobre nosotros</a>
+    <a routerLink="/blog">Blog</a>
+    <a routerLink="/contacto">Contacto</a>
+  </nav>
+  <div class="header-actions">
+    <a class="ghost-button" routerLink="/favoritos"><i class="ui-icon ui-icon--heart"></i> Favoritos</a>
+    <a class="ghost-button" routerLink="/login">Iniciar sesión</a>
+    <a class="primary-button" routerLink="/registrar">Registrar mi negocio</a>
+  </div>
+</header>
+
+<section class="market-hero">
+  <div class="market-hero__copy">
+    <p class="trust-badge"><span>✓</span> Negocios verificados, clientes protegidos</p>
+    <h1>Encontrá negocios confiables. <span>Comprá tranquilo.</span></h1>
+    <p>
+      Marketplace de negocios verificados en Costa Rica. Conectamos personas con Pymes serias y comprometidas
+      con un excelente servicio.
+    </p>
+    <div class="hero-actions">
+      <a class="primary-button primary-button--large" routerLink="/directorio"><i class="ui-icon ui-icon--search"></i> Buscar negocios</a>
+      <a class="ghost-button ghost-button--large" routerLink="/registrar"><i class="ui-icon ui-icon--store"></i> Registrar mi negocio</a>
+    </div>
+    <div class="trust-row">
+      <span><i class="line-icon line-icon--shield"></i> Negocios<br />verificados</span>
+      <span><i class="line-icon line-icon--chat"></i> Atención al cliente<br />de calidad</span>
+      <span><i class="line-icon line-icon--lock"></i> Compras más<br />seguras</span>
+    </div>
+  </div>
+  <div class="market-hero__media">
+    <img src="https://images.unsplash.com/photo-1556741533-6e6a62bd8b49?auto=format&fit=crop&w=1500&q=88" alt="Dueña de pyme verificada" />
+    <aside class="verified-card">
+      <span>✓</span>
+      <strong>Negocio Verificado</strong>
+      <p>Repostería Dulce Encanto</p>
+      <b>★ ★ ★ ★ ★</b>
+      <small><strong>4.9</strong> (128 reseñas)</small>
+      <em>Responde en menos de 1 hora</em>
+    </aside>
+  </div>
+</section>
+
+<main class="home-main">
+  <form class="market-search" (ngSubmit)="searchDirectory()">
+    <input name="search" [(ngModel)]="search" placeholder="¿Qué producto o servicio necesitás?" />
+    <select name="category" [(ngModel)]="selectedCategory">
+      <option value="">Todas las categorías</option>
+      <option *ngFor="let category of categories" [value]="category.slug">{{ category.name }}</option>
+    </select>
+    <select name="province">
+      <option>Toda Costa Rica</option>
+      <option>San José</option>
+      <option>Alajuela</option>
+      <option>Cartago</option>
+      <option>Heredia</option>
+      <option>Guanacaste</option>
+      <option>Puntarenas</option>
+      <option>Limón</option>
+    </select>
+    <button type="submit">Buscar</button>
+  </form>
+
+  <section class="home-section">
+    <div class="inline-heading">
+      <h2>Categorías populares</h2>
+      <a routerLink="/categorias">Ver todas las categorías →</a>
+    </div>
+    <div class="popular-grid">
+      <a class="popular-card" *ngFor="let category of homeCategories" routerLink="/directorio">
+        <span class="category-icon category-icon--{{ category.icon }}"></span>
+        <strong>{{ category.label }}</strong>
+      </a>
+      <a class="popular-card" routerLink="/categorias">
+        <span class="category-icon category-icon--more"></span>
+        <strong>Más categorías</strong>
+      </a>
+    </div>
+  </section>
+
+  <section class="stat-band">
+    <article><i class="line-icon line-icon--store"></i><p>Negocios verificados</p><strong>+1,200</strong></article>
+    <article><i class="line-icon line-icon--people"></i><p>Clientes satisfechos</p><strong>+10,000</strong></article>
+    <article><i class="line-icon line-icon--star"></i><p>Reseñas reales</p><strong>+5,500</strong></article>
+    <article><i class="line-icon line-icon--pin"></i><p>Provincias cubiertas</p><strong>7</strong></article>
+  </section>
+
+  <section class="home-section split-preview">
+    <div>
+      <p class="eyebrow">Verificación</p>
+      <h2>Un directorio pensado para bajar el riesgo antes de contactar.</h2>
+      <p>Cada solicitud pasa por revisión de identidad, operación, referencias, evidencia y declaraciones formales.</p>
+    </div>
+    <a class="primary-button" routerLink="/como-funciona">Ver cómo funciona</a>
+  </section>
+</main>

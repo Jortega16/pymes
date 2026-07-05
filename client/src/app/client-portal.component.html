@@ -1,0 +1,122 @@
+<main class="client-auth" *ngIf="!isAuthenticated">
+  <section class="client-auth__visual">
+    <a class="brand brand--dark" routerLink="/">
+      <span class="brand__mark">✓</span>
+      <span class="brand__word"><strong>Pymes</strong><small>Verificadas</small></span>
+    </a>
+    <div>
+      <p class="trust-badge"><span>✓</span> Portal cliente</p>
+      <h1>Administre la ficha pública de su pyme.</h1>
+      <p>Agregue detalles, horarios, galería y servicios. Todo cambio queda pendiente de revisión para proteger la confianza del marketplace.</p>
+    </div>
+  </section>
+
+  <form class="client-auth__card" (ngSubmit)="login()">
+    <div>
+      <p class="eyebrow">Acceso seguro</p>
+      <h2>Iniciar sesión</h2>
+      <p>Use el correo y contraseña asociados a su pyme.</p>
+    </div>
+    <input name="clientEmail" [(ngModel)]="email" type="email" placeholder="Correo asociado a la pyme" required />
+    <input name="clientPassword" [(ngModel)]="password" type="password" placeholder="Contraseña" required />
+    <p class="form-error" *ngIf="loginError">{{ loginError }}</p>
+    <button type="submit">Entrar al portal</button>
+    <a routerLink="/">Volver al inicio</a>
+  </form>
+</main>
+
+<div class="core-admin client-admin" *ngIf="isAuthenticated">
+  <aside class="core-sidebar client-sidebar">
+    <a class="core-brand" routerLink="/">
+      <span>✓</span>
+      <strong>Pymes</strong>
+      <small>Portal cliente</small>
+    </a>
+    <nav class="core-menu">
+      <button type="button" [class.is-active]="activeSection === 'profile'" (click)="activeSection = 'profile'"><span>▤</span> Perfil público</button>
+      <button type="button" [class.is-active]="activeSection === 'details'" (click)="activeSection = 'details'"><span>☰</span> Detalles</button>
+      <button type="button" [class.is-active]="activeSection === 'media'" (click)="activeSection = 'media'"><span>▧</span> Galería</button>
+      <button type="button" [class.is-active]="activeSection === 'contact'" (click)="activeSection = 'contact'"><span>☏</span> Contacto</button>
+    </nav>
+    <div class="core-sidebar__footer">
+      <a routerLink="/directorio">Ver directorio</a>
+      <a *ngIf="selected" [routerLink]="['/negocio', selected.slug]">Ver mi ficha</a>
+    </div>
+  </aside>
+
+  <section class="core-main">
+    <header class="core-topbar">
+      <div>
+        <p>Home / Cliente / {{ activeSection }}</p>
+        <h1>{{ selected?.name || 'Portal cliente' }}</h1>
+      </div>
+      <div class="core-topbar__actions">
+        <button type="button" (click)="loadBusinesses()">Actualizar</button>
+        <button type="button" (click)="logout()">Cerrar sesión</button>
+      </div>
+    </header>
+
+    <main class="admin-shell client-dashboard">
+      <section class="core-kpis client-kpis">
+        <article class="core-kpi core-kpi--blue"><span>{{ selectedStatusLabel }}</span><p>Estado de ficha</p><small>Cambios pasan a revisión</small></article>
+        <article class="core-kpi core-kpi--green"><span>{{ selected?.plan || '-' }}</span><p>Plan actual</p><small>Visibilidad en el marketplace</small></article>
+        <article class="core-kpi core-kpi--amber"><span>{{ selected?.rating || 0 }} / 5</span><p>Calificación</p><small>{{ selected?.reviewCount || 0 }} reseñas</small></article>
+        <article class="core-kpi core-kpi--red"><span>{{ selected?.services?.length || 0 }}</span><p>Servicios publicados</p><small>Complete la oferta</small></article>
+      </section>
+
+      <p class="notice" *ngIf="notice">{{ notice }}</p>
+
+      <section class="admin-grid admin-grid--bottom" *ngIf="businesses.length">
+        <section class="admin-card">
+          <div class="card-heading"><h2>Mis pymes</h2></div>
+          <div class="table-list">
+            <article *ngFor="let business of businesses">
+              <div><strong>{{ business.name }}</strong><span>{{ business.status }} · {{ business.plan }}</span></div>
+              <button type="button" (click)="edit(business)">Editar</button>
+            </article>
+          </div>
+        </section>
+
+        <form class="admin-card form-grid client-editor" *ngIf="selected" (ngSubmit)="save()">
+          <div class="card-heading">
+            <h2>Editar ficha</h2>
+            <button type="submit">Enviar a revisión</button>
+          </div>
+
+          <ng-container *ngIf="activeSection === 'profile'">
+            <input name="clientName" [(ngModel)]="selected.name" placeholder="Nombre" required />
+            <select name="clientCategory" [(ngModel)]="selected.categoryId" required>
+              <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
+            </select>
+            <textarea name="clientDescription" [(ngModel)]="selected.description" placeholder="Descripción corta" required></textarea>
+            <textarea name="clientStory" [(ngModel)]="selected.story" placeholder="Historia del negocio y propuesta de valor"></textarea>
+            <label class="check-row"><input name="clientOpen" [(ngModel)]="selected.isOpen" type="checkbox" />Abierta ahora</label>
+          </ng-container>
+
+          <ng-container *ngIf="activeSection === 'details'">
+            <textarea name="clientServices" [(ngModel)]="servicesText" placeholder="Servicios, uno por línea"></textarea>
+            <textarea name="clientSchedule" [(ngModel)]="selected.schedule" placeholder="Horario de atención"></textarea>
+            <input name="clientCoverage" [(ngModel)]="selected.coverageArea" placeholder="Zona de cobertura" />
+          </ng-container>
+
+          <ng-container *ngIf="activeSection === 'media'">
+            <input name="clientImage" [(ngModel)]="selected.imageUrl" placeholder="Imagen principal URL" />
+            <textarea name="clientGallery" [(ngModel)]="galleryText" placeholder="URLs de galería, una por línea"></textarea>
+          </ng-container>
+
+          <ng-container *ngIf="activeSection === 'contact'">
+            <input name="clientProvince" [(ngModel)]="selected.province" placeholder="Provincia" required />
+            <input name="clientCanton" [(ngModel)]="selected.canton" placeholder="Cantón" />
+            <input name="clientAddress" [(ngModel)]="selected.address" placeholder="Dirección" />
+            <input name="clientPhone" [(ngModel)]="selected.phone" placeholder="Teléfono" />
+            <input name="clientPublicEmail" [(ngModel)]="selected.email" type="email" placeholder="Correo público" />
+            <input name="clientWebsite" [(ngModel)]="selected.website" placeholder="Sitio web" />
+            <input name="clientInstagram" [(ngModel)]="socialInstagram" placeholder="Instagram URL" />
+            <input name="clientFacebook" [(ngModel)]="socialFacebook" placeholder="Facebook URL" />
+            <input name="clientWhatsapp" [(ngModel)]="socialWhatsapp" placeholder="WhatsApp URL" />
+          </ng-container>
+        </form>
+      </section>
+    </main>
+  </section>
+</div>

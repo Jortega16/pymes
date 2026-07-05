@@ -1,0 +1,38 @@
+<main class="login-select">
+  <div class="login-select__container">
+    <header class="login-select__header">
+      <a class="brand brand--dark" routerLink="/">
+        <span class="brand__mark">✓</span>
+        <span class="brand__word"><strong>Pymes</strong><small>Acceso</small></span>
+      </a>
+      <h1>Seleccione su portal</h1>
+      <p>Elija el tipo de cuenta con la que desea iniciar sesión.</p>
+    </header>
+
+    <div class="login-select__grid">
+      <!-- Client Portal Option -->
+      <a routerLink="/cliente" class="login-select__card">
+        <div class="login-select__icon">
+          <span>✓</span>
+        </div>
+        <h2>Portal Cliente</h2>
+        <p>Edite la información de su negocio, actualice horarios, suba imágenes a su galería y responda a reseñas de clientes.</p>
+        <span class="login-select__cta">Ingresar al Portal →</span>
+      </a>
+
+      <!-- Backoffice Option -->
+      <a routerLink="/backoffice" class="login-select__card login-select__card--admin">
+        <div class="login-select__icon">
+          <span>⚙</span>
+        </div>
+        <h2>Backoffice Administrador</h2>
+        <p>Gestione el directorio de negocios, verifique solicitudes, controle suscripciones, planes y visualice estadísticas globales.</p>
+        <span class="login-select__cta">Ir al Panel de Control →</span>
+      </a>
+    </div>
+
+    <footer class="login-select__footer">
+      <a routerLink="/">Volver al sitio de inicio</a>
+    </footer>
+  </div>
+</main>

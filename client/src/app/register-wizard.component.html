@@ -1,0 +1,166 @@
+<header class="site-header">
+  <a class="brand brand--dark" routerLink="/">
+    <span class="brand__mark">✓</span>
+    <span><strong>Pymes</strong><small>Verificadas</small></span>
+  </a>
+  <nav class="site-nav">
+    <a routerLink="/directorio">Directorio</a>
+    <a routerLink="/como-funciona">Cómo funciona</a>
+    <a routerLink="/contacto">Contacto</a>
+  </nav>
+  <a class="ghost-button" routerLink="/">Volver al inicio</a>
+</header>
+
+<main class="wizard-shell">
+  <section class="wizard-intro">
+    <p class="eyebrow">Registro</p>
+    <h1>Formulario de Registro y Verificación de Pymes</h1>
+    <p>Complete un paso a la vez. La sección 8 contiene declaraciones obligatorias para enviar la solicitud.</p>
+  </section>
+
+  <section class="success-message" *ngIf="requestSent">
+    Solicitud recibida. El equipo puede verla en el backoffice.
+  </section>
+
+  <form class="wizard-card" (ngSubmit)="submitRequest()" *ngIf="!requestSent">
+    <div class="wizard-progress">
+      <div>
+        <span>Paso {{ currentStep + 1 }} de {{ steps.length }}</span>
+        <strong>{{ steps[currentStep] }}</strong>
+      </div>
+      <div class="progress-track"><span [style.width.%]="progress"></span></div>
+    </div>
+
+    <div class="step-tabs">
+      <button type="button" *ngFor="let step of steps; let i = index" [class.is-active]="i === currentStep" (click)="currentStep = i">
+        {{ i + 1 }}
+      </button>
+    </div>
+
+    <fieldset *ngIf="currentStep === 0">
+      <legend>Sección 1: Información del negocio</legend>
+      <input name="businessName" [(ngModel)]="request.businessName" placeholder="Nombre comercial del negocio" required />
+      <input name="legalName" [(ngModel)]="request.legalName" placeholder="Razón social (si aplica)" />
+      <input name="legalId" [(ngModel)]="request.legalId" placeholder="Cédula jurídica o física" required />
+      <input name="startYear" [(ngModel)]="request.startYear" type="number" min="1900" placeholder="Año de inicio de operaciones" required />
+      <select name="categoryId" [(ngModel)]="request.categoryId" required>
+        <option [ngValue]="null">Categoría principal</option>
+        <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
+      </select>
+      <input name="subcategory" [(ngModel)]="request.subcategory" placeholder="Subcategoría" required />
+      <textarea name="message" [(ngModel)]="request.message" placeholder="Descripción breve del negocio" required></textarea>
+    </fieldset>
+
+    <fieldset *ngIf="currentStep === 1">
+      <legend>Sección 2: Datos de contacto</legend>
+      <input name="ownerName" [(ngModel)]="request.ownerName" placeholder="Nombre del representante" required />
+      <input name="ownerRole" [(ngModel)]="request.ownerRole" placeholder="Cargo dentro del negocio" required />
+      <input name="email" [(ngModel)]="request.email" type="email" placeholder="Correo electrónico" required />
+      <input name="phone" [(ngModel)]="request.phone" placeholder="WhatsApp principal" required />
+      <input name="secondaryPhone" [(ngModel)]="request.secondaryPhone" placeholder="Teléfono secundario" />
+      <input name="province" [(ngModel)]="request.province" placeholder="Provincia" required />
+      <input name="canton" [(ngModel)]="request.canton" placeholder="Cantón" required />
+      <input name="district" [(ngModel)]="request.district" placeholder="Distrito" />
+      <input name="address" [(ngModel)]="request.address" placeholder="Dirección comercial" />
+    </fieldset>
+
+    <fieldset *ngIf="currentStep === 2">
+      <legend>Sección 3: Presencia digital</legend>
+      <input name="website" [(ngModel)]="request.website" placeholder="Sitio web" />
+      <input name="facebook" [(ngModel)]="request.facebook" placeholder="Facebook" />
+      <input name="instagram" [(ngModel)]="request.instagram" placeholder="Instagram" />
+      <input name="tiktok" [(ngModel)]="request.tiktok" placeholder="TikTok" />
+      <input name="linkedin" [(ngModel)]="request.linkedin" placeholder="LinkedIn" />
+      <input name="googleBusiness" [(ngModel)]="request.googleBusiness" placeholder="Google Business Profile" />
+      <input name="marketplace" [(ngModel)]="request.marketplace" placeholder="Marketplace adicional donde vende" />
+    </fieldset>
+
+    <fieldset *ngIf="currentStep === 3">
+      <legend>Sección 4: Evidencia de operación</legend>
+      <input name="operatingTime" [(ngModel)]="request.operatingTime" placeholder="Tiempo operando" required />
+      <input name="approximateClients" [(ngModel)]="request.approximateClients" placeholder="Cantidad aproximada de clientes atendidos" required />
+      <input name="photosUrl" [(ngModel)]="request.photosUrl" placeholder="Enlace a 3-10 fotografías reales" required />
+      <input name="logoUrl" [(ngModel)]="request.logoUrl" placeholder="Enlace al logo" required />
+      <input name="workEvidenceUrl" [(ngModel)]="request.workEvidenceUrl" placeholder="Evidencia de trabajos realizados" />
+    </fieldset>
+
+    <fieldset *ngIf="currentStep === 4">
+      <legend>Sección 5: Validación de confianza</legend>
+      <select name="electronicInvoice" [(ngModel)]="request.electronicInvoice" required>
+        <option value="">¿Cuenta con facturación electrónica?</option>
+        <option value="si">Sí</option>
+        <option value="no">No</option>
+      </select>
+      <select name="warranty" [(ngModel)]="request.warranty" required>
+        <option value="">¿Ofrece garantía?</option>
+        <option value="si">Sí</option>
+        <option value="no">No</option>
+      </select>
+      <textarea name="warrantyExplanation" [(ngModel)]="request.warrantyExplanation" placeholder="Explique la garantía"></textarea>
+      <select name="returnPolicy" [(ngModel)]="request.returnPolicy" required>
+        <option value="">¿Tiene políticas de devolución o reembolso?</option>
+        <option value="si">Sí</option>
+        <option value="no">No</option>
+      </select>
+      <textarea name="permits" [(ngModel)]="request.permits" placeholder="Permisos o certificaciones relevantes"></textarea>
+      <input name="permitsUrl" [(ngModel)]="request.permitsUrl" placeholder="Enlace a documentos si aplica" />
+    </fieldset>
+
+    <fieldset *ngIf="currentStep === 5">
+      <legend>Sección 6: Referencias</legend>
+      <input name="reference1" [(ngModel)]="request.reference1" placeholder="Cliente 1: nombre, teléfono y correo" required />
+      <input name="reference2" [(ngModel)]="request.reference2" placeholder="Cliente 2: nombre, teléfono y correo" required />
+      <input name="reference3" [(ngModel)]="request.reference3" placeholder="Cliente 3: nombre, teléfono y correo" required />
+    </fieldset>
+
+    <fieldset *ngIf="currentStep === 6">
+      <legend>Sección 7: Evaluación de servicio al cliente</legend>
+      <input name="responseTime" [(ngModel)]="request.responseTime" placeholder="Tiempo promedio de respuesta" required />
+      <input name="serviceChannels" [(ngModel)]="request.serviceChannels" placeholder="Canales de atención utilizados" required />
+      <input name="weeklyServiceDays" [(ngModel)]="request.weeklyServiceDays" type="number" min="1" max="7" placeholder="Días por semana que atiende clientes" required />
+    </fieldset>
+
+    <fieldset class="declarations" *ngIf="currentStep === 7">
+      <legend>Sección 8: Declaraciones</legend>
+      <label class="check-row">
+        <input name="truthfulInformation" [(ngModel)]="request.declarations.truthfulInformation" type="checkbox" required />
+        Declaro que la información es verdadera.
+      </label>
+      <label class="check-row">
+        <input name="noApprovalGuarantee" [(ngModel)]="request.declarations.noApprovalGuarantee" type="checkbox" required />
+        Entiendo que el envío no garantiza aprobación.
+      </label>
+      <label class="check-row">
+        <input name="additionalVerification" [(ngModel)]="request.declarations.additionalVerification" type="checkbox" required />
+        Acepto verificaciones adicionales.
+      </label>
+      <label class="check-row">
+        <input name="suspensionUnderstanding" [(ngModel)]="request.declarations.suspensionUnderstanding" type="checkbox" required />
+        Entiendo que el negocio puede ser suspendido o retirado por incumplimientos graves.
+      </label>
+      <label class="check-row">
+        <input name="publicationAuthorization" [(ngModel)]="request.declarations.publicationAuthorization" type="checkbox" required />
+        Autorizo la publicación de la información aprobada.
+      </label>
+    </fieldset>
+
+    <fieldset *ngIf="currentStep === 8">
+      <legend>Sección 9: Preguntas estratégicas</legend>
+      <textarea name="marketplaceReason" [(ngModel)]="request.marketplaceReason" placeholder="¿Por qué desea formar parte del marketplace?" required></textarea>
+      <textarea name="businessDifference" [(ngModel)]="request.businessDifference" placeholder="¿Qué diferencia a su negocio?" required></textarea>
+      <textarea name="unhappyClientPlan" [(ngModel)]="request.unhappyClientPlan" placeholder="¿Qué haría si un cliente queda insatisfecho?" required></textarea>
+      <select name="publicClaims" [(ngModel)]="request.publicClaims" required>
+        <option value="">¿Ha tenido reclamos públicos en los últimos 12 meses?</option>
+        <option value="si">Sí</option>
+        <option value="no">No</option>
+      </select>
+      <textarea name="publicClaimsExplanation" [(ngModel)]="request.publicClaimsExplanation" placeholder="Si respondió sí, explique brevemente"></textarea>
+    </fieldset>
+
+    <div class="wizard-actions">
+      <button type="button" class="ghost-button" (click)="previous()" [disabled]="currentStep === 0">Anterior</button>
+      <button type="button" class="primary-button" (click)="next()" *ngIf="currentStep < steps.length - 1">Siguiente</button>
+      <button type="submit" class="primary-button" *ngIf="currentStep === steps.length - 1" [disabled]="!allDeclarationsAccepted">Enviar solicitud</button>
+    </div>
+  </form>
+</main>

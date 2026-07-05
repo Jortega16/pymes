@@ -1,0 +1,101 @@
+<header class="site-header">
+  <a class="brand brand--dark" routerLink="/">
+    <span class="brand__mark">✓</span>
+    <span><strong>Pymes</strong><small>Verificadas</small></span>
+  </a>
+  <nav class="site-nav">
+    <a routerLink="/directorio">Directorio</a>
+    <a routerLink="/categorias">Categorías</a>
+    <a routerLink="/como-funciona">Cómo funciona</a>
+    <a routerLink="/contacto">Contacto</a>
+  </nav>
+  <a class="primary-button" routerLink="/registrar">Registrar mi negocio</a>
+</header>
+
+<main>
+  <section class="page-hero">
+    <p class="eyebrow">Directorio</p>
+    <h1>Buscá negocios verificados por categoría, provincia o servicio.</h1>
+    <form class="market-search market-search--page" (ngSubmit)="applyFilters()">
+      <input name="search" [(ngModel)]="search" placeholder="Producto o servicio" />
+      <select name="category" [(ngModel)]="selectedCategory">
+        <option value="">Todas las categorías</option>
+        <option *ngFor="let category of categories" [value]="category.slug">{{ category.name }}</option>
+      </select>
+      <button type="submit">Buscar</button>
+    </form>
+  </section>
+
+  <section class="category-band category-band--flat" aria-label="Categorías">
+    <button
+      type="button"
+      class="category-pill"
+      *ngFor="let category of categories"
+      [class.is-active]="selectedCategory === category.slug"
+      (click)="selectCategory(category.slug)"
+    >
+      <span class="category-pill__dot" [style.background]="category.color"></span>
+      <span>{{ category.name }}</span>
+      <small>{{ category.businessCount || 0 }}</small>
+    </button>
+  </section>
+
+  <section class="section directory-layout">
+    <div class="section__heading">
+      <p class="eyebrow">Resultados</p>
+      <h2>{{ businesses.length }} pymes disponibles</h2>
+      <p>Listados activos con información esencial para decidir rápido y contactar sin fricción.</p>
+    </div>
+
+    <aside class="ad-strip">
+      <strong>Publicidad destacada</strong>
+      <span>Espacio disponible para marcas, bancos, cámaras empresariales y aliados comerciales.</span>
+      <a routerLink="/registrar">Anunciar mi pyme</a>
+    </aside>
+
+    <div class="business-grid" *ngIf="!loading; else loadingState">
+      <article class="business-card" *ngFor="let business of businesses">
+        <a class="business-card__image" [routerLink]="['/negocio', business.slug]">
+          <img [src]="business.imageUrl || 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=900&q=80'" [alt]="business.name" />
+        </a>
+        <div class="business-card__body">
+          <div class="business-card__meta">
+            <span class="status" [class.is-closed]="!business.isOpen">{{ business.isOpen ? 'Abierto ahora' : 'Cerrado ahora' }}</span>
+            <span>{{ business.rating | number: '1.1-1' }} / 5</span>
+          </div>
+          <h3><a [routerLink]="['/negocio', business.slug]">{{ business.name }}</a></h3>
+          <p>{{ business.description }}</p>
+          <div class="tags">
+            <span [style.borderColor]="business.categoryColor">{{ business.categoryName }}</span>
+            <span>{{ business.province }}</span>
+            <span class="plan">{{ business.plan }}</span>
+          </div>
+          <div class="business-card__actions">
+            <a [routerLink]="['/negocio', business.slug]">Ver detalles</a>
+            <a [href]="'mailto:' + business.email">Contactar</a>
+            <a *ngIf="business.website" [href]="business.website" target="_blank" rel="noreferrer">Sitio web</a>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <ng-template #loadingState>
+      <div class="loading">Cargando pymes...</div>
+    </ng-template>
+  </section>
+
+  <section class="section coupons-section">
+    <div class="section__heading">
+      <p class="eyebrow">Cupones</p>
+      <h2>Promociones activas</h2>
+    </div>
+    <div class="coupon-row">
+      <article class="coupon" *ngFor="let coupon of coupons">
+        <span>{{ coupon.discount }}</span>
+        <h3>{{ coupon.title }}</h3>
+        <p>{{ coupon.businessName }}</p>
+        <code>{{ coupon.code }}</code>
+      </article>
+    </div>
+  </section>
+</main>

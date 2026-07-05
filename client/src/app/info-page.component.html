@@ -1,0 +1,29 @@
+<header class="site-header">
+  <a class="brand brand--dark" routerLink="/">
+    <span class="brand__mark">✓</span>
+    <span><strong>Pymes</strong><small>Verificadas</small></span>
+  </a>
+  <nav class="site-nav">
+    <a routerLink="/directorio">Directorio</a>
+    <a routerLink="/categorias">Categorías</a>
+    <a routerLink="/como-funciona">Cómo funciona</a>
+    <a routerLink="/sobre-nosotros">Sobre nosotros</a>
+    <a routerLink="/blog">Blog</a>
+    <a routerLink="/contacto">Contacto</a>
+  </nav>
+  <a class="primary-button" routerLink="/registrar">Registrar mi negocio</a>
+</header>
+
+<main>
+  <section class="page-hero info-hero">
+    <p class="eyebrow">Pymes Verificadas</p>
+    <h1>{{ title }}</h1>
+    <p>{{ description }}</p>
+  </section>
+  <section class="info-grid">
+    <article *ngFor="let card of cards">
+      <span>✓</span>
+      <p>{{ card }}</p>
+    </article>
+  </section>
+</main>

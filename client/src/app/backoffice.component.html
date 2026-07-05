@@ -1,0 +1,365 @@
+<main class="client-auth" *ngIf="!isAuthenticated">
+  <section class="client-auth__visual">
+    <a class="brand brand--dark" routerLink="/">
+      <span class="brand__mark">✓</span>
+      <span class="brand__word"><strong>Pymes</strong><small>Backoffice</small></span>
+    </a>
+    <div>
+      <p class="trust-badge"><span>✓</span> Backoffice</p>
+      <h1>Ingresar al backoffice</h1>
+      <p>Use una cuenta administradora para gestionar pymes, pagos y analítica.</p>
+    </div>
+  </section>
+
+  <form class="client-auth__card" (ngSubmit)="login()">
+    <div>
+      <p class="eyebrow">Acceso seguro</p>
+      <h2>Iniciar sesión</h2>
+      <p>Use el correo y contraseña asociados a su cuenta administradora.</p>
+    </div>
+    <input name="adminEmail" [(ngModel)]="loginEmail" type="email" placeholder="Correo administrador" required />
+    <input name="adminPassword" [(ngModel)]="loginPassword" type="password" placeholder="Contraseña" required />
+    <p class="form-error" *ngIf="loginError">{{ loginError }}</p>
+    <button type="submit">Entrar al panel</button>
+    <a routerLink="/">Volver al inicio</a>
+  </form>
+</main>
+
+<div class="core-admin" *ngIf="isAuthenticated">
+  <aside class="core-sidebar">
+    <a class="core-brand" routerLink="/">
+      <span>✓</span>
+      <strong>Pymes</strong>
+      <small>Backoffice</small>
+    </a>
+    <nav class="core-menu">
+      <button type="button" [class.is-active]="activeTab === 'overview'" (click)="activeTab = 'overview'"><span>▦</span> Dashboard</button>
+      <button type="button" [class.is-active]="activeTab === 'businesses'" (click)="activeTab = 'businesses'"><span>▤</span> Pymes</button>
+      <button type="button" [class.is-active]="activeTab === 'requests'" (click)="activeTab = 'requests'"><span>☑</span> Solicitudes</button>
+      <button type="button" [class.is-active]="activeTab === 'subscriptions'" (click)="activeTab = 'subscriptions'"><span>↻</span> Suscripciones</button>
+      <button type="button" [class.is-active]="activeTab === 'payments'" (click)="activeTab = 'payments'"><span>₡</span> Pagos</button>
+      <button type="button" [class.is-active]="activeTab === 'analytics'" (click)="activeTab = 'analytics'"><span>⌁</span> Analítica</button>
+      <button type="button" [class.is-active]="activeTab === 'coupons'" (click)="activeTab = 'coupons'"><span>%</span> Cupones</button>
+    </nav>
+    <div class="core-sidebar__footer">
+      <a routerLink="/">Sitio público</a>
+      <a routerLink="/cliente">Portal cliente</a>
+    </div>
+  </aside>
+
+  <section class="core-main">
+    <header class="core-topbar">
+      <div>
+        <p>Home / Admin / {{ activeTab }}</p>
+        <h1>Dashboard</h1>
+      </div>
+      <div class="core-topbar__actions">
+        <button type="button" (click)="refresh()">Actualizar</button>
+        <button type="button" (click)="logout()">Cerrar sesión</button>
+        <a routerLink="/registrar">Nueva pyme</a>
+      </div>
+    </header>
+
+    <main class="admin-shell">
+      <section class="core-kpis">
+        <article class="core-kpi core-kpi--blue"><span>{{ businesses.length }}</span><p>Pymes totales</p><small>{{ activeBusinesses }} activas</small></article>
+        <article class="core-kpi core-kpi--green"><span>{{ formatMoney(monthlyRevenue) }}</span><p>MRR estimado</p><small>{{ subscriptions.length }} suscripciones</small></article>
+        <article class="core-kpi core-kpi--amber"><span>{{ pendingRequests }}</span><p>Solicitudes nuevas</p><small>Revisión pendiente</small></article>
+        <article class="core-kpi core-kpi--red"><span>{{ analytics?.totalViews || 0 }}</span><p>Visitas totales</p><small>{{ analytics?.views7d || 0 }} esta semana</small></article>
+      </section>
+
+      <p class="notice" *ngIf="notice">{{ notice }}</p>
+
+  <section class="admin-grid admin-grid--bottom" *ngIf="activeTab === 'overview'">
+    <section class="admin-card">
+      <div class="card-heading"><h2>Salud de operación</h2></div>
+      <div class="ops-list">
+        <article><strong>{{ pendingRequests }}</strong><span>Solicitudes nuevas para revisar</span></article>
+        <article><strong>{{ pastDueSubscriptions }}</strong><span>Suscripciones vencidas o con pago pendiente</span></article>
+        <article><strong>{{ analytics?.views7d || 0 }}</strong><span>Visitas de los últimos 7 días</span></article>
+        <article><strong>{{ analytics?.uniqueVisitors || 0 }}</strong><span>Visitantes únicos estimados</span></article>
+      </div>
+    </section>
+    <section class="admin-card">
+      <div class="card-heading"><h2>Top negocios por visitas</h2></div>
+      <div class="table-list">
+        <article *ngFor="let business of analytics?.topBusinesses || []">
+          <div><strong>{{ business.name }}</strong><span>{{ business.views }} visitas</span></div>
+        </article>
+      </div>
+    </section>
+  </section>
+
+  <!-- Graphic Charts in Overview -->
+  <section class="admin-grid admin-grid--bottom" *ngIf="activeTab === 'overview' && analytics">
+    <!-- Daily Page Views SVG Chart -->
+    <section class="admin-card chart-card">
+      <div class="card-heading">
+        <h2>Tendencia de visitas (últimos 7 días)</h2>
+        <span class="chart-summary">{{ analytics.views7d }} visitas totales</span>
+      </div>
+      <div class="svg-chart-container">
+        <svg viewBox="0 0 500 150" class="svg-line-chart">
+          <!-- Gradients -->
+          <defs>
+            <linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#15955a" stop-opacity="0.2" />
+              <stop offset="100%" stop-color="#15955a" stop-opacity="0.0" />
+            </linearGradient>
+          </defs>
+          
+          <!-- Grid Lines -->
+          <line x1="0" y1="20" x2="500" y2="20" class="chart-grid-line" />
+          <line x1="0" y1="65" x2="500" y2="65" class="chart-grid-line" />
+          <line x1="0" y1="110" x2="500" y2="110" class="chart-grid-line" />
+          
+          <!-- Area Under the Line -->
+          <polygon [attr.points]="svgAreaPath" fill="url(#chart-grad)" *ngIf="svgAreaPath" />
+          
+          <!-- Line Path -->
+          <path [attr.d]="svgPath" fill="none" stroke="#15955a" stroke-width="3" *ngIf="svgPath" />
+          
+          <!-- Dots on Vertices -->
+          <g *ngIf="svgPoints.length">
+            <circle *ngFor="let p of svgPoints" [attr.cx]="p.x" [attr.cy]="p.y" r="5" class="chart-dot" />
+          </g>
+        </svg>
+        
+        <!-- X Axis labels -->
+        <div class="chart-x-axis" *ngIf="analytics.views7dHistory">
+          <span *ngFor="let h of analytics.views7dHistory">{{ h.date.slice(5) }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Plan Distribution CSS Chart -->
+    <section class="admin-card chart-card">
+      <div class="card-heading">
+        <h2>Distribución de planes contratados</h2>
+        <span class="chart-summary">{{ businesses.length }} pymes totales</span>
+      </div>
+      <div class="plans-chart-container">
+        <div class="plans-chart-row">
+          <div class="plan-chart-label">
+            <strong>Starter</strong>
+            <span>{{ planStarterCount }} negocios ({{ (planStarterCount / totalPlanCount * 100).toFixed(0) }}%)</span>
+          </div>
+          <div class="plan-chart-bar-bg">
+            <div class="plan-chart-bar plan-chart-bar--starter" [style.width.%]="planStarterCount / totalPlanCount * 100"></div>
+          </div>
+        </div>
+        <div class="plans-chart-row">
+          <div class="plan-chart-label">
+            <strong>Growth</strong>
+            <span>{{ planGrowthCount }} negocios ({{ (planGrowthCount / totalPlanCount * 100).toFixed(0) }}%)</span>
+          </div>
+          <div class="plan-chart-bar-bg">
+            <div class="plan-chart-bar plan-chart-bar--growth" [style.width.%]="planGrowthCount / totalPlanCount * 100"></div>
+          </div>
+        </div>
+        <div class="plans-chart-row">
+          <div class="plan-chart-label">
+            <strong>Premium</strong>
+            <span>{{ planPremiumCount }} negocios ({{ (planPremiumCount / totalPlanCount * 100).toFixed(0) }}%)</span>
+          </div>
+          <div class="plan-chart-bar-bg">
+            <div class="plan-chart-bar plan-chart-bar--premium" [style.width.%]="planPremiumCount / totalPlanCount * 100"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </section>
+
+  <section class="admin-grid" *ngIf="activeTab === 'businesses'">
+    <form class="admin-card form-grid" (ngSubmit)="saveBusiness()">
+      <div class="card-heading">
+        <h2>{{ editingId ? 'Editar pyme' : 'Nueva pyme' }}</h2>
+        <button type="button" *ngIf="editingId" (click)="cancelEdit()">Cancelar</button>
+      </div>
+      <input name="name" [(ngModel)]="business.name" placeholder="Nombre" required />
+      <input name="ownerEmail" [(ngModel)]="business.ownerEmail" type="email" placeholder="Correo del dueño" />
+      <select name="categoryId" [(ngModel)]="business.categoryId" required>
+        <option *ngFor="let category of categories" [ngValue]="category.id">{{ category.name }}</option>
+      </select>
+      <textarea name="description" [(ngModel)]="business.description" placeholder="Descripción" required></textarea>
+      <input name="province" [(ngModel)]="business.province" placeholder="Provincia" required />
+      <input name="canton" [(ngModel)]="business.canton" placeholder="Cantón" />
+      <input name="address" [(ngModel)]="business.address" placeholder="Dirección" />
+      <input name="phone" [(ngModel)]="business.phone" placeholder="Teléfono" />
+      <input name="email" [(ngModel)]="business.email" type="email" placeholder="Correo público" />
+      <input name="website" [(ngModel)]="business.website" placeholder="Sitio web" />
+      <input name="imageUrl" [(ngModel)]="business.imageUrl" placeholder="Imagen URL" />
+      <textarea name="story" [(ngModel)]="business.story" placeholder="Historia / propuesta extendida"></textarea>
+      <textarea name="servicesText" [(ngModel)]="servicesText" placeholder="Servicios, uno por línea"></textarea>
+      <textarea name="galleryText" [(ngModel)]="galleryText" placeholder="URLs de galería, una por línea"></textarea>
+      <input name="schedule" [(ngModel)]="business.schedule" placeholder="Horario" />
+      <input name="coverageArea" [(ngModel)]="business.coverageArea" placeholder="Zona de cobertura" />
+      <textarea name="verificationNotes" [(ngModel)]="business.verificationNotes" placeholder="Notas de verificación visibles"></textarea>
+      <select name="status" [(ngModel)]="business.status">
+        <option value="active">Activa</option>
+        <option value="pending">Pendiente</option>
+        <option value="paused">Pausada</option>
+      </select>
+      <select name="plan" [(ngModel)]="business.plan">
+        <option value="starter">Starter</option>
+        <option value="growth">Growth</option>
+        <option value="premium">Premium</option>
+      </select>
+      <input name="rating" [(ngModel)]="business.rating" type="number" min="0" max="5" step="0.1" placeholder="Rating" />
+      <input name="reviewCount" [(ngModel)]="business.reviewCount" type="number" min="0" placeholder="Reseñas" />
+      <label class="check-row"><input name="isOpen" [(ngModel)]="business.isOpen" type="checkbox" />Abierta ahora</label>
+      <label class="check-row"><input name="featured" [(ngModel)]="business.featured" type="checkbox" />Destacada</label>
+      <button type="submit">{{ editingId ? 'Guardar cambios' : 'Crear pyme' }}</button>
+    </form>
+
+    <section class="admin-card">
+      <div class="card-heading"><h2>Todas las pymes</h2></div>
+      <div class="table-list">
+        <article *ngFor="let business of businesses">
+          <div>
+            <strong>{{ business.name }}</strong>
+            <span>{{ business.categoryName }} · {{ business.status }} · {{ business.plan }} · dueño: {{ business.ownerEmail || business.email }}</span>
+          </div>
+          <div class="row-actions">
+            <button type="button" (click)="editBusiness(business)">Editar</button>
+            <button type="button" class="danger" (click)="deleteBusiness(business.id)">Eliminar</button>
+          </div>
+        </article>
+      </div>
+    </section>
+  </section>
+
+  <section class="admin-card" *ngIf="activeTab === 'requests'">
+    <div class="card-heading"><h2>Solicitudes de verificación</h2></div>
+    <div class="table-list table-list--wide">
+      <article *ngFor="let request of requests">
+        <div>
+          <strong>{{ request.businessName }}</strong>
+          <span>{{ request.ownerName }} · {{ request.email }} · {{ request.status }}</span>
+        </div>
+        <select [ngModel]="request.status" (ngModelChange)="updateRequestStatus(request, $event)" name="request-{{ request.id }}">
+          <option value="new">Nueva</option>
+          <option value="contacted">Contactada</option>
+          <option value="approved">Aprobada</option>
+          <option value="rejected">Rechazada</option>
+        </select>
+      </article>
+    </div>
+  </section>
+
+  <section class="admin-card" *ngIf="activeTab === 'subscriptions'">
+    <div class="card-heading"><h2>Suscripciones y rotación de cobro</h2></div>
+    <div class="subscription-grid">
+      <article *ngFor="let subscription of subscriptions">
+        <strong>{{ subscription.businessName }}</strong>
+        <select [(ngModel)]="subscription.plan" name="plan-{{ subscription.id }}">
+          <option value="starter">Starter</option>
+          <option value="growth">Growth</option>
+          <option value="premium">Premium</option>
+        </select>
+        <select [(ngModel)]="subscription.status" name="status-{{ subscription.id }}">
+          <option value="trialing">Prueba</option>
+          <option value="active">Activa</option>
+          <option value="past_due">Pago vencido</option>
+          <option value="paused">Pausada</option>
+          <option value="canceled">Cancelada</option>
+        </select>
+        <select [(ngModel)]="subscription.billingCycle" name="cycle-{{ subscription.id }}">
+          <option value="monthly">Mensual</option>
+          <option value="quarterly">Trimestral</option>
+          <option value="annual">Anual</option>
+        </select>
+        <input [(ngModel)]="subscription.amountCents" name="amount-{{ subscription.id }}" type="number" min="0" placeholder="Monto en centavos" />
+        <input [(ngModel)]="subscription.nextPaymentAt" name="next-{{ subscription.id }}" type="date" />
+        <input [(ngModel)]="subscription.paymentMethod" name="method-{{ subscription.id }}" placeholder="Método de pago" />
+        <button type="button" (click)="updateSubscription(subscription)">Guardar</button>
+      </article>
+    </div>
+  </section>
+
+  <section class="admin-grid admin-grid--bottom" *ngIf="activeTab === 'payments'">
+    <form class="admin-card form-grid compact" (ngSubmit)="registerPayment()">
+      <div class="card-heading"><h2>Registrar pago</h2></div>
+      <select name="paymentSubscriptionId" [(ngModel)]="payment.subscriptionId" required>
+        <option [ngValue]="null">Seleccione suscripción</option>
+        <option *ngFor="let subscription of subscriptions" [ngValue]="subscription.id">{{ subscription.businessName }} · {{ subscription.plan }}</option>
+      </select>
+      <input name="paymentAmount" [(ngModel)]="payment.amountCents" type="number" min="0" placeholder="Monto en centavos" required />
+      <select name="paymentStatus" [(ngModel)]="payment.status">
+        <option value="paid">Pagado</option>
+        <option value="pending">Pendiente</option>
+        <option value="failed">Fallido</option>
+        <option value="refunded">Reembolsado</option>
+      </select>
+      <input name="paymentPaidAt" [(ngModel)]="payment.paidAt" type="date" />
+      <input name="paymentReference" [(ngModel)]="payment.reference" placeholder="Referencia" />
+      <textarea name="paymentNotes" [(ngModel)]="payment.notes" placeholder="Notas"></textarea>
+      <button type="submit">Registrar pago</button>
+    </form>
+    <section class="admin-card">
+      <div class="card-heading"><h2>Historial</h2></div>
+      <div class="table-list">
+        <article *ngFor="let item of payments">
+          <div><strong>{{ item.businessName }}</strong><span>{{ formatMoney(item.amountCents, item.currency) }} · {{ item.status }} · {{ item.paidAt || item.dueAt || item.createdAt | date }}</span></div>
+        </article>
+      </div>
+    </section>
+  </section>
+
+  <section class="admin-grid admin-grid--bottom" *ngIf="activeTab === 'analytics' && analytics">
+    <section class="admin-card chart-card">
+      <div class="card-heading"><h2>Páginas más vistas</h2></div>
+      <div class="bar-chart-list">
+        <article *ngFor="let page of analytics.topPages || []">
+          <div class="bar-chart-text">
+            <strong>{{ page.path }}</strong>
+            <span>{{ page.views }} visitas</span>
+          </div>
+          <div class="bar-chart-bar-bg">
+            <div class="bar-chart-bar" [style.width.%]="(page.views / (analytics.totalViews || 1) * 100)"></div>
+          </div>
+        </article>
+      </div>
+    </section>
+    <section class="admin-card chart-card">
+      <div class="card-heading"><h2>Pymes más vistas</h2></div>
+      <div class="bar-chart-list">
+        <article *ngFor="let business of analytics.topBusinesses || []">
+          <div class="bar-chart-text">
+            <strong>{{ business.name }}</strong>
+            <span>{{ business.views }} visitas</span>
+          </div>
+          <div class="bar-chart-bar-bg">
+            <div class="bar-chart-bar bar-chart-bar--teal" [style.width.%]="(business.views / (analytics.totalViews || 1) * 100)"></div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </section>
+
+  <section class="admin-grid admin-grid--bottom" *ngIf="activeTab === 'coupons'">
+    <form class="admin-card form-grid compact" (ngSubmit)="createCoupon()">
+      <div class="card-heading"><h2>Nuevo cupón</h2></div>
+      <select name="couponBusinessId" [(ngModel)]="coupon.businessId" required>
+        <option [ngValue]="null">Seleccione pyme</option>
+        <option *ngFor="let business of businesses" [ngValue]="business.id">{{ business.name }}</option>
+      </select>
+      <input name="couponTitle" [(ngModel)]="coupon.title" placeholder="Título" required />
+      <input name="couponCode" [(ngModel)]="coupon.code" placeholder="Código" required />
+      <input name="couponDiscount" [(ngModel)]="coupon.discount" placeholder="Descuento" required />
+      <input name="couponExpiresAt" [(ngModel)]="coupon.expiresAt" type="date" />
+      <label class="check-row"><input name="couponActive" [(ngModel)]="coupon.active" type="checkbox" />Activo</label>
+      <button type="submit">Crear cupón</button>
+    </form>
+    <section class="admin-card">
+      <div class="card-heading"><h2>Cupones</h2></div>
+      <div class="table-list">
+        <article *ngFor="let coupon of coupons">
+          <div><strong>{{ coupon.title }}</strong><span>{{ coupon.businessName }} · {{ coupon.discount }} · {{ coupon.active ? 'Activo' : 'Inactivo' }}</span></div>
+        </article>
+      </div>
+    </section>
+  </section>
+    </main>
+  </section>
+</div>
