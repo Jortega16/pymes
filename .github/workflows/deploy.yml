@@ -1,0 +1,70 @@
+name: CI and Dokploy Deploy
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: pymes-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: Build and Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+            server/package-lock.json
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Install API dependencies
+        run: npm ci --prefix server
+
+      - name: Install Angular dependencies
+        run: npm ci --prefix client
+
+      - name: Validate API JavaScript
+        run: |
+          find server/src -name "*.js" -print0 | xargs -0 -n1 node --check
+
+      - name: Build Angular app
+        run: npm run build --prefix client
+
+      - name: Validate Docker Compose
+        run: docker compose config
+
+  deploy:
+    name: Deploy to Dokploy
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    env:
+      DOKPLOY_WEBHOOK_URL: ${{ secrets.DOKPLOY_WEBHOOK_URL }}
+
+    steps:
+      - name: Trigger Dokploy webhook
+        if: env.DOKPLOY_WEBHOOK_URL != ''
+        run: |
+          curl --fail --show-error --silent --request POST "$DOKPLOY_WEBHOOK_URL"
+
+      - name: Skip deploy without webhook
+        if: env.DOKPLOY_WEBHOOK_URL == ''
+        run: |
+          echo "DOKPLOY_WEBHOOK_URL is not configured. CI passed, deploy was skipped."
