@@ -3,7 +3,10 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AnalyticsSummary, Business, Category, Coupon, Payment, RegistrationRequest, Subscription, Review } from './models';
 
-const API_URL = 'http://localhost:4000/api';
+const API_URL =
+  window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:4000/api'
+    : '/api';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
