@@ -1,18 +1,24 @@
 #!/bin/sh
-set -e
 
 if [ -z "$DATABASE_URL" ]; then
   echo "ERROR: DATABASE_URL is not set"
   exit 1
 fi
 
-echo "Running database migrations..."
-npm run db:migrate
+API_PORT="${API_PORT:-4000}"
 
-echo "Running database seed..."
-if ! npm run db:seed; then
-  echo "WARN: seed failed, continuing with API startup"
-fi
+(
+  echo "Running database migrations..."
+  if npm run db:migrate; then
+    echo "Migrations complete."
+  else
+    echo "ERROR: migrations failed"
+    exit 1
+  fi
 
-echo "Starting API on 0.0.0.0:${PORT:-4000}..."
+  echo "Running database seed..."
+  npm run db:seed || echo "WARN: seed failed"
+) &
+
+echo "Starting API on 0.0.0.0:${API_PORT}..."
 exec npm start

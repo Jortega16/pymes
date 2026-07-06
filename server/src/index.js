@@ -13,7 +13,7 @@ import { requestsRouter } from './routes/requests.js';
 import { subscriptionsRouter } from './routes/subscriptions.js';
 
 const app = express();
-const port = process.env.PORT || 4000;
+const port = Number(process.env.API_PORT || 4000);
 
 app.use(helmet());
 app.use(cors({ origin: ['http://localhost:4200', 'http://127.0.0.1:4200', 'http://localhost:4300', 'http://127.0.0.1:4300'] }));
