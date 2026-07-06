@@ -42,6 +42,6 @@ app.use((error, _req, res, _next) => {
   res.status(500).json({ message: 'Unexpected server error' });
 });
 
-app.listen(port, () => {
-  console.log(`API running on http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`API running on http://0.0.0.0:${port}`);
 });

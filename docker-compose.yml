@@ -18,8 +18,10 @@ services:
       retries: 6
       start_period: 120s
     networks:
-      - internal
-      - dokploy-network
+      internal:
+        aliases:
+          - pymes-api-internal
+      dokploy-network:
 
   web:
     build:
