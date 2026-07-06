@@ -8,10 +8,17 @@ services:
       PORT: ${PORT:-4000}
       DATABASE_URL: ${DATABASE_URL}
       AUTH_SECRET: ${AUTH_SECRET}
-    command: sh -c "npm run db:migrate && npm run db:seed && npm start"
+    command: sh scripts/start.sh
     expose:
       - "4000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 120s
     networks:
+      - internal
       - dokploy-network
 
   web:
@@ -20,12 +27,15 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
-      - api
+      api:
+        condition: service_healthy
     expose:
       - "80"
     networks:
+      - internal
       - dokploy-network
 
 networks:
+  internal:
   dokploy-network:
     external: true
