@@ -1,5 +1,5 @@
 services:
-  api:
+  pymes-api:
     build:
       context: ./server
       dockerfile: Dockerfile
@@ -27,7 +27,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
-      - api
+      - pymes-api
     expose:
       - "80"
     networks:
