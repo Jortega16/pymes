@@ -20,5 +20,5 @@ API_PORT="${API_PORT:-4000}"
   npm run db:seed || echo "WARN: seed failed"
 ) &
 
-echo "Starting API on 0.0.0.0:${API_PORT}..."
+echo "Starting API on 0.0.0.0:${API_PORT:-4000}..."
 exec npm start
